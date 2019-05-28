@@ -52,7 +52,15 @@ public class Movies {
     private Movie mapToMovie(String cells[]) {
         Movie movie = new Movie();
 
+        movie.setId(Integer.parseInt(cells[5]));
         movie.setTitle(cells[20]);
+        movie.setOriginalLanguage(cells[7]);
+        movie.setOverview(cells[9]);
+        movie.setReleaseDate(cells[14]);
+        movie.setBudget(Float.parseFloat(cells[2]));
+        movie.setRevenue(Float.parseFloat(cells[15]));
+        movie.setRuntime(Float.parseFloat(cells[16]));
+        movie.setAdult(Boolean.parseBoolean(cells[0]));
 
         return movie;
     };
@@ -71,7 +79,7 @@ public class Movies {
             // read data line by line
             while ((nextRecord = csvReader.readNext()) != null) {
                 Movie thisMovie = mapToMovie(nextRecord);
-                System.out.println("Movie: " + thisMovie.getTitle());
+                System.out.println("Movie: " + thisMovie.toString());
             }
         }
         catch (Exception e) {
@@ -94,11 +102,13 @@ public class Movies {
         movies.readCSV();
 
         // add document
+        /*
         BaseDocument thisMovie = new BaseDocument();
         thisMovie.setKey("1");
         thisMovie.addAttribute("name", "Avengers");
 
         movies.addDocument(arangoDB, MOVIES_DB_NAME, MOVIES_COLLECTION_NAME, thisMovie);
+        */
     }
 
 }
