@@ -4,72 +4,26 @@ import java.io.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import com.arangodb.ArangoDB;
-import com.arangodb.ArangoDBException;
-import com.arangodb.entity.BaseDocument;
-import com.arangodb.entity.CollectionEntity;
-
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
 
-import ucr.ppci.nosql.movies.model.*;
+import ucr.ppci.nosql.movies.csv.BaseRowProcessor;
+import ucr.ppci.nosql.movies.csv.MovieRowProcessor;
+import ucr.ppci.nosql.movies.db.ArangoDBConnection;
+import ucr.ppci.nosql.movies.model.BaseEdgeModel;
+import ucr.ppci.nosql.movies.model.BaseEntityModel;
+import ucr.ppci.nosql.movies.model.MovieModel;
 
 public class Movies {
 
-    final private static ArangoDB arangoDB = new ArangoDB.Builder().build();
-    final private static String MOVIES_DB_NAME = "Movies";
-    final private static String MOVIES_COLLECTION_NAME = "movies";
+    final public static String MOVIES_DB_NAME = "Movies";
 
-    private void createDB(ArangoDB arangoDB, String dbName) {
-        try {
-            arangoDB.createDatabase(dbName);
-            System.out.println("Database created: " + dbName);
-        } catch (final ArangoDBException ae) {
-            System.err.println("Failed to create database: " + dbName + "; " + ae.getMessage());
-        }
-    }
+    final private static ArangoDBConnection arangoDBConnection = ArangoDBConnection.getInstance();
 
-    private void createCollection(ArangoDB arangoDB, String dbName, String collectionName) {
-        try {
-            final CollectionEntity newCollection = arangoDB.db(dbName).createCollection(collectionName);
-            System.out.println("Collection created: " + collectionName);
-        }
-        catch (final ArangoDBException ae) {
-            System.err.println("Failed to create collection: " + collectionName + "; " + ae.getMessage());
-        }
-    }
-
-    private void addDocument(ArangoDB arangoDB, String dbName, String collectionName, BaseDocument document) {
-        try {
-            arangoDB.db(dbName).collection(collectionName).insertDocument(document);
-            System.out.println("Document inserted");
-        }
-        catch (final ArangoDBException ae) {
-            System.err.println("Failed to insert document. " + ae.getMessage());
-        }
-    }
-
-    private Movie mapToMovie(String cells[]) {
-        Movie movie = new Movie();
-
-        movie.setId(Integer.parseInt(cells[5]));
-        movie.setTitle(cells[20]);
-        movie.setOriginalLanguage(cells[7]);
-        movie.setOverview(cells[9]);
-        movie.setReleaseDate(cells[14]);
-        movie.setBudget(Float.parseFloat(cells[2]));
-        movie.setRevenue(Float.parseFloat(cells[15]));
-        movie.setRuntime(Float.parseFloat(cells[16]));
-        movie.setAdult(Boolean.parseBoolean(cells[0]));
-
-        return movie;
-    };
-
-    private void readCSV() {
+    private void readCSV(String fileName, BaseRowProcessor modelRow) {
         try{
             // open file reader
-            Path filePath = Paths.get(getClass().getClassLoader().getResource("movies_metadata_100.csv").toURI());
-            System.out.println("CVS PATH: " + filePath.toString());
+            Path filePath = Paths.get(getClass().getClassLoader().getResource(fileName).toURI());
             FileReader filereader = new FileReader(filePath.toString());
 
             // create csvReader object passing file reader as a parameter
@@ -78,8 +32,7 @@ public class Movies {
 
             // read data line by line
             while ((nextRecord = csvReader.readNext()) != null) {
-                Movie thisMovie = mapToMovie(nextRecord);
-                System.out.println("Movie: " + thisMovie.toString());
+                modelRow.process(nextRecord);
             }
         }
         catch (Exception e) {
@@ -90,25 +43,19 @@ public class Movies {
     public static void main(String args[]) {
         Movies movies = new Movies();
 
-        //final ArangoDB arangoDB = new ArangoDB.Builder().build();
-
         // create DB
-        movies.createDB(arangoDB, MOVIES_DB_NAME);
+        arangoDBConnection.createDB(MOVIES_DB_NAME);
 
-        // create collection
-        movies.createCollection(arangoDB, MOVIES_DB_NAME, MOVIES_COLLECTION_NAME);
+        // create collections
+        arangoDBConnection.createCollection(MOVIES_DB_NAME, MovieModel.MOVIES_COLLECTION_NAME);
+        arangoDBConnection.createCollection(MOVIES_DB_NAME, BaseEntityModel.GENRES_COLLECTION_NAME);
+        arangoDBConnection.createCollection(MOVIES_DB_NAME, BaseEntityModel.COMPANIES_COLLECTION_NAME);
+
+        arangoDBConnection.createEdgeCollection(MOVIES_DB_NAME, BaseEdgeModel.MOVIES_GENRES_EDGE_COLLECTION_NAME);
+        arangoDBConnection.createEdgeCollection(MOVIES_DB_NAME, BaseEdgeModel.MOVIES_COMPANIES_EDGE_COLLECTION_NAME);
 
         // read file
-        movies.readCSV();
-
-        // add document
-        /*
-        BaseDocument thisMovie = new BaseDocument();
-        thisMovie.setKey("1");
-        thisMovie.addAttribute("name", "Avengers");
-
-        movies.addDocument(arangoDB, MOVIES_DB_NAME, MOVIES_COLLECTION_NAME, thisMovie);
-        */
+        movies.readCSV("movies_metadata_100.csv", new MovieRowProcessor());
     }
 
 }

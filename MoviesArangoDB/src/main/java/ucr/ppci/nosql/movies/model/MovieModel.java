@@ -1,9 +1,9 @@
 package ucr.ppci.nosql.movies.model;
 
-public class Movie {
+public class MovieModel extends BaseEntityModel {
 
-    private long id;
-    private String title;
+    final public static String MOVIES_COLLECTION_NAME = "movies";
+
     private String originalLanguage;
     private String overview;
     private String releaseDate;
@@ -11,22 +11,6 @@ public class Movie {
     private float revenue;
     private float runtime;
     private boolean adult;
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
 
     public String getOriginalLanguage() {
         return originalLanguage;
@@ -86,9 +70,9 @@ public class Movie {
 
     @Override
     public String toString() {
-        return "Movie{" +
-                "id=" + id +
-                ", title='" + title + '\'' +
+        return "MovieModel{" +
+                "_key=" + super.getKey() +
+                ", name='" + super.getName() + '\'' +
                 ", originalLanguage='" + originalLanguage + '\'' +
                 ", overview='" + overview + '\'' +
                 ", releaseDate='" + releaseDate + '\'' +
