@@ -19,6 +19,7 @@ public class MovieRowProcessor extends BaseRowProcessor {
 
     private Set genresCache = new HashSet<BaseEntityModel>();
     private Set companiesCache = new HashSet<BaseEntityModel>();
+    private Set spokenLanguagesCache = new HashSet<BaseEntityModel>();
 
     public void process(String cells[]) {
         MovieModel movie = new MovieModel();
@@ -43,6 +44,10 @@ public class MovieRowProcessor extends BaseRowProcessor {
         // replace single quotes in JSON for double quotes
         System.out.println("\tCompanies: " + cells[12]);
         processCompanies(movie.getKey(), cells[12].replace("'", "\""));
+
+        // replace single quotes in JSON for double quotes
+        System.out.println("\tSpokenLanguages: " + cells[17]);
+        processSpokenLanguages(movie.getKey(), cells[17].replace("'", "\""));
     };
 
     private void processGenres(String movieKey, String jsonString) {
@@ -120,4 +125,43 @@ public class MovieRowProcessor extends BaseRowProcessor {
             System.err.println("Failed to parse JSON value. " + pe.getMessage());
         }
     }
+
+    private void processSpokenLanguages(String movieKey, String jsonString) {
+        JSONParser jsonParser = new JSONParser();
+        BaseEntityModel model = new BaseEntityModel();
+
+        try {
+            // parse JSON spoken_languages values
+            JSONArray jsonArray = (JSONArray) jsonParser.parse(jsonString);
+            JSONObject jsonObject = null;
+            String objectId = null;
+
+            // process each spoken_language in the list
+            for (Object spokenLanguageObject: jsonArray.toArray()) {
+                jsonObject = (JSONObject)spokenLanguageObject;
+                objectId = jsonObject.get("iso_639_1").toString();
+
+                // check if spoken_language is not already in cache (and so in the DB)
+                if (!spokenLanguagesCache.contains(objectId)) {
+                    model.setKey(objectId);
+                    model.setName(jsonObject.get("name").toString());
+
+                    // add spoken_language to DB and cache
+                    arangoDBConnection.addDocument(Movies.MOVIES_DB_NAME, BaseEntityModel.SPOKEN_LANGUAGES_COLLECTION_NAME, model);
+                    spokenLanguagesCache.add(objectId);
+                }
+
+                System.out.println("SPOKEN_LANGUAGE: " + model.toString());
+
+                // add edge -> relationship
+                BaseEdgeModel edge = new BaseEdgeModel();
+                edge.setFrom(MovieModel.MOVIES_COLLECTION_NAME + "/" + movieKey);
+                edge.setTo(BaseEntityModel.SPOKEN_LANGUAGES_COLLECTION_NAME + "/" + objectId);
+                arangoDBConnection.addDocument(Movies.MOVIES_DB_NAME, BaseEdgeModel.MOVIES_SPOKEN_LANGUAGES_EDGE_COLLECTION_NAME, edge);
+            }
+        } catch (ParseException pe) {
+            System.err.println("Failed to parse JSON value. " + pe.getMessage());
+        }
+    }
+
 }
