@@ -38,6 +38,8 @@ public class Movies {
         catch (Exception e) {
             System.err.println("Failed to read file. " + e.getMessage());
         }
+        System.out.println("<<<<<<<<<<End>>>>>>>>>>");
+        System.exit(0);
     }
 
     public static void main(String args[]) {

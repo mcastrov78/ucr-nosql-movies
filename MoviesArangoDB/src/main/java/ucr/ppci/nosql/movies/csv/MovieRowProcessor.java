@@ -88,7 +88,7 @@ public class MovieRowProcessor extends BaseRowProcessor {
         BaseEntityModel model = new BaseEntityModel();
 
         try {
-            // parse JSON genres values
+            // parse JSON production_companies values
             JSONArray jsonArray = (JSONArray) jsonParser.parse(jsonString);
             JSONObject jsonObject = null;
             String objectId = null;
