@@ -8,7 +8,6 @@ import ucr.ppci.nosql.movies.Movies;
 import ucr.ppci.nosql.movies.db.ArangoDBConnection;
 import ucr.ppci.nosql.movies.model.BaseEdgeModel;
 import ucr.ppci.nosql.movies.model.BaseEntityModel;
-import ucr.ppci.nosql.movies.model.KeywordModel;
 import ucr.ppci.nosql.movies.model.MovieModel;
 
 import java.util.HashSet;
