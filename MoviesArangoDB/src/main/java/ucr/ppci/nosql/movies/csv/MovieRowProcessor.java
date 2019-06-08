@@ -20,6 +20,7 @@ public class MovieRowProcessor extends BaseRowProcessor {
     private Set genresCache = new HashSet<BaseEntityModel>();
     private Set companiesCache = new HashSet<BaseEntityModel>();
     private Set spokenLanguagesCache = new HashSet<BaseEntityModel>();
+    private Set countriesCache = new HashSet<BaseEntityModel>();
 
     public void process(String cells[]) {
         MovieModel movie = new MovieModel();
@@ -44,6 +45,10 @@ public class MovieRowProcessor extends BaseRowProcessor {
         // replace single quotes in JSON for double quotes
         System.out.println("\tCompanies: " + cells[12]);
         processCompanies(movie.getKey(), cells[12].replace("'", "\""));
+
+        // replace single quotes in JSON for double quotes
+        System.out.println("\tCountries: " + cells[13]);
+        processCountries(movie.getKey(), cells[13].replace("'", "\""));
 
         // replace single quotes in JSON for double quotes
         System.out.println("\tSpokenLanguages: " + cells[17]);
@@ -158,6 +163,44 @@ public class MovieRowProcessor extends BaseRowProcessor {
                 edge.setFrom(MovieModel.MOVIES_COLLECTION_NAME + "/" + movieKey);
                 edge.setTo(BaseEntityModel.SPOKEN_LANGUAGES_COLLECTION_NAME + "/" + objectId);
                 arangoDBConnection.addDocument(Movies.MOVIES_DB_NAME, BaseEdgeModel.MOVIES_SPOKEN_LANGUAGES_EDGE_COLLECTION_NAME, edge);
+            }
+        } catch (ParseException pe) {
+            System.err.println("Failed to parse JSON value. " + pe.getMessage());
+        }
+    }
+
+    private void processCountries(String movieKey, String jsonString) {
+        JSONParser jsonParser = new JSONParser();
+        BaseEntityModel model = new BaseEntityModel();
+
+        try {
+            // parse JSON production_countries values
+            JSONArray jsonArray = (JSONArray) jsonParser.parse(jsonString);
+            JSONObject jsonObject = null;
+            String objectId = null;
+
+            // process each production_country in the list
+            for (Object countryObject : jsonArray.toArray()) {
+                jsonObject = (JSONObject) countryObject;
+                objectId = jsonObject.get("iso_3166_1").toString();
+
+                // check if production_country is not already in cache (and so in the DB)
+                if (!countriesCache.contains(objectId)) {
+                    model.setKey(objectId);
+                    model.setName(jsonObject.get("name").toString());
+
+                    // add production_country to DB and cache
+                    arangoDBConnection.addDocument(Movies.MOVIES_DB_NAME, BaseEntityModel.COUNTRIES_COLLECTION_NAME, model);
+                    countriesCache.add(objectId);
+                }
+
+                System.out.println("COUNTRY: " + model.toString());
+
+                // add edge -> relationship
+                BaseEdgeModel edge = new BaseEdgeModel();
+                edge.setFrom(MovieModel.MOVIES_COLLECTION_NAME + "/" + movieKey);
+                edge.setTo(BaseEntityModel.COUNTRIES_COLLECTION_NAME + "/" + objectId);
+                arangoDBConnection.addDocument(Movies.MOVIES_DB_NAME, BaseEdgeModel.MOVIES_COUNTRIES_EDGE_COLLECTION_NAME, edge);
             }
         } catch (ParseException pe) {
             System.err.println("Failed to parse JSON value. " + pe.getMessage());

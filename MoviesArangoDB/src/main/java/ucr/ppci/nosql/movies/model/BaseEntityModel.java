@@ -5,6 +5,7 @@ public class BaseEntityModel {
     final public static String GENRES_COLLECTION_NAME = "genres";
     final public static String COMPANIES_COLLECTION_NAME = "companies";
     final public static String SPOKEN_LANGUAGES_COLLECTION_NAME = "spokenLanguages";
+    final public static String COUNTRIES_COLLECTION_NAME = "countries";
 
     private String _key;
     private String name;

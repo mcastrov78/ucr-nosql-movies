@@ -5,6 +5,7 @@ public class BaseEdgeModel {
     final public static String MOVIES_GENRES_EDGE_COLLECTION_NAME = "moviesGenres";
     final public static String MOVIES_COMPANIES_EDGE_COLLECTION_NAME = "moviesCompanies";
     final public static String MOVIES_SPOKEN_LANGUAGES_EDGE_COLLECTION_NAME = "moviesSpokenLanguages";
+    final public static String MOVIES_COUNTRIES_EDGE_COLLECTION_NAME = "moviesCountries";
 
     private String _from;
     private String _to;
