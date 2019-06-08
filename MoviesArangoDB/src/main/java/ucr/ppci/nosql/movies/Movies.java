@@ -9,10 +9,12 @@ import com.opencsv.CSVReaderBuilder;
 
 import ucr.ppci.nosql.movies.csv.BaseRowProcessor;
 import ucr.ppci.nosql.movies.csv.MovieRowProcessor;
+import ucr.ppci.nosql.movies.csv.KeywordRowProcesor;
 import ucr.ppci.nosql.movies.db.ArangoDBConnection;
 import ucr.ppci.nosql.movies.model.BaseEdgeModel;
 import ucr.ppci.nosql.movies.model.BaseEntityModel;
 import ucr.ppci.nosql.movies.model.MovieModel;
+import ucr.ppci.nosql.movies.model.KeywordModel;
 
 public class Movies {
 
@@ -38,8 +40,7 @@ public class Movies {
         catch (Exception e) {
             System.err.println("Failed to read file. " + e.getMessage());
         }
-        System.out.println("<<<<<<<<<<End>>>>>>>>>>");
-        System.exit(0);
+        System.out.println("<<<<<<<<<< " + fileName + " was processed successfully " + " >>>>>>>>>>");
     }
 
     public static void main(String args[]) {
@@ -48,20 +49,29 @@ public class Movies {
         // create DB
         arangoDBConnection.createDB(MOVIES_DB_NAME);
 
-        // create collections
+        // create movies collections
         arangoDBConnection.createCollection(MOVIES_DB_NAME, MovieModel.MOVIES_COLLECTION_NAME);
         arangoDBConnection.createCollection(MOVIES_DB_NAME, BaseEntityModel.GENRES_COLLECTION_NAME);
         arangoDBConnection.createCollection(MOVIES_DB_NAME, BaseEntityModel.COMPANIES_COLLECTION_NAME);
         arangoDBConnection.createCollection(MOVIES_DB_NAME, BaseEntityModel.SPOKEN_LANGUAGES_COLLECTION_NAME);
         arangoDBConnection.createCollection(MOVIES_DB_NAME, BaseEntityModel.COUNTRIES_COLLECTION_NAME);
 
+        // create keywords collections
+        arangoDBConnection.createCollection(MOVIES_DB_NAME, KeywordModel.KEYWORDS_COLLECTION_NAME);
+
+        // create edges
         arangoDBConnection.createEdgeCollection(MOVIES_DB_NAME, BaseEdgeModel.MOVIES_GENRES_EDGE_COLLECTION_NAME);
         arangoDBConnection.createEdgeCollection(MOVIES_DB_NAME, BaseEdgeModel.MOVIES_COMPANIES_EDGE_COLLECTION_NAME);
         arangoDBConnection.createEdgeCollection(MOVIES_DB_NAME, BaseEdgeModel.MOVIES_SPOKEN_LANGUAGES_EDGE_COLLECTION_NAME);
         arangoDBConnection.createEdgeCollection(MOVIES_DB_NAME, BaseEdgeModel.MOVIES_COUNTRIES_EDGE_COLLECTION_NAME);
+        arangoDBConnection.createEdgeCollection(MOVIES_DB_NAME, BaseEdgeModel.KEYWORDS_EDGE_COLLECTION_NAME);
 
-        // read file
+        // read movies file
         movies.readCSV("movies_metadata_100.csv", new MovieRowProcessor());
+        // read movies file
+        movies.readCSV("keywords_100.csv", new KeywordRowProcesor());
+
+        System.exit(0);
     }
 
 }
