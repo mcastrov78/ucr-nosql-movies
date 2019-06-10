@@ -27,4 +27,12 @@ public class BaseEdgeModel {
     public void setTo(String _to) {
         this._to = _to;
     }
+
+    @Override
+    public String toString() {
+        return "BaseEdgeModel{" +
+                "_from='" + _from + '\'' +
+                ", _to='" + _to + '\'' +
+                '}';
+    }
 }
