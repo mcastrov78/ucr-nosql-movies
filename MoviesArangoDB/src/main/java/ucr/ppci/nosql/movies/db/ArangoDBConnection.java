@@ -1,7 +1,9 @@
 package ucr.ppci.nosql.movies.db;
 
+import com.arangodb.ArangoCollection;
 import com.arangodb.ArangoDB;
 import com.arangodb.ArangoDBException;
+import com.arangodb.ArangoDatabase;
 import com.arangodb.entity.CollectionEntity;
 import com.arangodb.entity.CollectionType;
 import com.arangodb.model.CollectionCreateOptions;
@@ -33,6 +35,17 @@ public class ArangoDBConnection {
         }
         catch (final ArangoDBException ae) {
             System.err.println("Failed to create collection: " + collectionName + "; " + ae.getMessage());
+        }
+    }
+
+    public void deleteCollection(String dbName, String collectionName) {
+        try {
+            final ArangoCollection collection = arangoDB.db(dbName).collection(collectionName);
+            collection.drop();
+            System.out.println("Collection deleted: " + collectionName);
+        }
+        catch (final ArangoDBException ae) {
+            System.err.println("Failed to delete collection: " + collectionName + "; " + ae.getMessage());
         }
     }
 

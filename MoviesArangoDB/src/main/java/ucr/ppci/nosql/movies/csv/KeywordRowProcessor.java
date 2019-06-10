@@ -13,7 +13,7 @@ import ucr.ppci.nosql.movies.model.MovieModel;
 import java.util.HashSet;
 import java.util.Set;
 
-public class KeywordRowProcesor extends BaseRowProcessor {
+public class KeywordRowProcessor extends BaseRowProcessor {
 
     final private static ArangoDBConnection arangoDBConnection = ArangoDBConnection.getInstance();
 
