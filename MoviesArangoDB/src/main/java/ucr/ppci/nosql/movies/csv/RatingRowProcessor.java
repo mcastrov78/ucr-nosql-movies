@@ -2,6 +2,7 @@ package ucr.ppci.nosql.movies.csv;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ucr.ppci.nosql.movies.Util;
 import ucr.ppci.nosql.movies.db.ArangoDBConnection;
 import ucr.ppci.nosql.movies.model.BaseEdgeModel;
 import ucr.ppci.nosql.movies.model.MovieModel;
@@ -15,21 +16,27 @@ public class RatingRowProcessor extends BaseRowProcessor {
 
     public void process(String cells[]) {
         RatingModel rating = new RatingModel();
-        String ratingID = cells[1] + cells[3];
 
-        rating.setKey(ratingID);
-        rating.setUserID(cells[0]);
-        rating.setRating(Float.parseFloat(cells[2]));
-        rating.setTimeStamp(cells[3]);
+        //only process complete rows
+        if (cells.length >= 4) {
+            String ratingID = cells[1] + cells[3];
 
-        // add rating to DB
-        arangoDBConnection.addDocument(Movies.MOVIES_DB_NAME, RatingModel.RATINGS_COLLECTION_NAME, rating);
+            rating.setKey(ratingID);
+            rating.setUserID(cells[0]);
+            rating.setRating(Util.parseFloat(cells[2]));
+            rating.setTimeStamp(cells[3]);
 
-        // add edge -> relationship
-        BaseEdgeModel edge = new BaseEdgeModel();
-        edge.setFrom(MovieModel.MOVIES_COLLECTION_NAME + "/" + cells[1]);
-        edge.setTo(RatingModel.RATINGS_COLLECTION_NAME + "/" + ratingID);
-        arangoDBConnection.addDocument(Movies.MOVIES_DB_NAME, BaseEdgeModel.RATINGS_EDGE_COLLECTION_NAME, edge);
+            // add rating to DB
+            arangoDBConnection.addDocument(Movies.MOVIES_DB_NAME, RatingModel.RATINGS_COLLECTION_NAME, rating);
+
+            // add edge -> relationship
+            BaseEdgeModel edge = new BaseEdgeModel();
+            edge.setFrom(MovieModel.MOVIES_COLLECTION_NAME + "/" + cells[1]);
+            edge.setTo(RatingModel.RATINGS_COLLECTION_NAME + "/" + ratingID);
+            arangoDBConnection.addDocument(Movies.MOVIES_DB_NAME, BaseEdgeModel.RATINGS_EDGE_COLLECTION_NAME, edge);
+        } else {
+            logger.warn("\t Ratings row has less fields than expected");
+        }
     }
 
 }

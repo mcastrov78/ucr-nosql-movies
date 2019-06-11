@@ -1,6 +1,5 @@
 package ucr.ppci.nosql.movies.csv;
 
-import com.google.gson.JsonParser;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -8,6 +7,7 @@ import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ucr.ppci.nosql.movies.Movies;
+import ucr.ppci.nosql.movies.Util;
 import ucr.ppci.nosql.movies.db.ArangoDBConnection;
 import ucr.ppci.nosql.movies.model.BaseEdgeModel;
 import ucr.ppci.nosql.movies.model.BaseEntityModel;
@@ -29,38 +29,29 @@ public class MovieRowProcessor extends BaseRowProcessor {
     public void process(String cells[]) {
         MovieModel movie = new MovieModel();
 
-        movie.setKey(cells[5]);
-        movie.setName(cells[20]);
-        movie.setOriginalLanguage(cells[7]);
-        movie.setOverview(cells[9]);
-        movie.setReleaseDate(cells[14]);
-        movie.setBudget(Float.parseFloat(cells[2]));
-        movie.setRevenue(Float.parseFloat(cells[15]));
-        movie.setRuntime(Float.parseFloat(cells[16]));
-        movie.setAdult(Boolean.parseBoolean(cells[0]));
+        //only process complete rows
+        if (cells.length >= 20) {
+            movie.setKey(cells[5]);
+            movie.setName(cells[20]);
+            movie.setOriginalLanguage(cells[7]);
+            movie.setOverview(cells[9]);
+            movie.setReleaseDate(cells[14]);
+            movie.setBudget(Util.parseFloat(cells[2]));
+            movie.setRevenue(Util.parseFloat(cells[15]));
+            movie.setRuntime(Util.parseFloat(cells[16]));
+            movie.setAdult(Boolean.parseBoolean(cells[0]));
 
-        // add movie to DB
-        arangoDBConnection.addDocument(Movies.MOVIES_DB_NAME, MovieModel.MOVIES_COLLECTION_NAME, movie);
+            // add movie to DB
+            arangoDBConnection.addDocument(Movies.MOVIES_DB_NAME, MovieModel.MOVIES_COLLECTION_NAME, movie);
 
-        // these JSON values INCORRECTLY use single quotes for string values and GSON parser can fix that
-        String sanitizedJson = new JsonParser().parse(cells[3]).toString();
-        processGenres(movie.getKey(), sanitizedJson);
-
-        sanitizedJson = new JsonParser().parse(cells[12]).toString();
-        processCompanies(movie.getKey(), sanitizedJson);
-
-        sanitizedJson = new JsonParser().parse(cells[13]).toString();
-        processCountries(movie.getKey(), sanitizedJson);
-
-        sanitizedJson = new JsonParser().parse(cells[17]).toString();
-        processSpokenLanguages(movie.getKey(), sanitizedJson);
-
-        /*
-        processGenres(movie.getKey(), cells[3].replace("'", "\""));
-        processCompanies(movie.getKey(), cells[12].replace("'", "\""));
-        processCountries(movie.getKey(), cells[13].replace("'", "\""));
-        processSpokenLanguages(movie.getKey(), cells[17].replace("'", "\""));
-        */
+            // these JSON values INCORRECTLY use single quotes for string values and GSON parser can fix that
+            processGenres(movie.getKey(), Util.sanitizeJson(cells[3]));
+            processCompanies(movie.getKey(), Util.sanitizeJson(cells[12]));
+            processCountries(movie.getKey(), Util.sanitizeJson(cells[13]));
+            processSpokenLanguages(movie.getKey(), Util.sanitizeJson(cells[17]));
+        } else {
+            logger.warn("\t Movies row has less fields than expected");
+        }
     };
 
     private void processGenres(String movieKey, String jsonString) {

@@ -1,7 +1,5 @@
 package ucr.ppci.nosql.movies.csv;
 
-import com.google.gson.JsonParser;
-
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -9,6 +7,7 @@ import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ucr.ppci.nosql.movies.Movies;
+import ucr.ppci.nosql.movies.Util;
 import ucr.ppci.nosql.movies.db.ArangoDBConnection;
 import ucr.ppci.nosql.movies.model.MovieCastEdgeModel;
 import ucr.ppci.nosql.movies.model.BaseEntityModel;
@@ -29,12 +28,8 @@ public class CreditsRowProcessor extends BaseRowProcessor {
     public void process(String cells[]) {
 
         // these JSON values INCORRECTLY use single quotes for string values and GSON parser can fix that
-        String sanitizedJson = new JsonParser().parse(cells[0]).toString();
-        processCast(cells[2], sanitizedJson);
-
-        // these JSON values INCORRECTLY use single quotes for string values and GSON parser can fix that
-        sanitizedJson = new JsonParser().parse(cells[1]).toString();
-        processCrew(cells[2], sanitizedJson);
+        processCast(cells[2], Util.sanitizeJson(cells[0]));
+        processCrew(cells[2], Util.sanitizeJson(cells[1]));
     };
 
     private void processCast(String movieKey, String jsonString) {
@@ -66,7 +61,7 @@ public class CreditsRowProcessor extends BaseRowProcessor {
                 MovieCastEdgeModel movieCastEdgeModel = new MovieCastEdgeModel();
                 movieCastEdgeModel.setFrom(MovieModel.MOVIES_COLLECTION_NAME + "/" + movieKey);
                 movieCastEdgeModel.setTo(BaseEntityModel.CAST_COLLECTION_NAME + "/" + objectId);
-                movieCastEdgeModel.setCharacter(jsonObject.get("character").toString());
+                movieCastEdgeModel.setCharacter(String.valueOf(jsonObject.get("character")));
                 arangoDBConnection.addDocument(Movies.MOVIES_DB_NAME, MovieCastEdgeModel.CREDITS_CAST_EDGE_COLLECTION_NAME, movieCastEdgeModel);
             }
         } catch (ParseException pe) {
@@ -103,7 +98,7 @@ public class CreditsRowProcessor extends BaseRowProcessor {
                 MovieCrewEdgeModel movieCrewEdgeModel = new MovieCrewEdgeModel();
                 movieCrewEdgeModel.setFrom(MovieModel.MOVIES_COLLECTION_NAME + "/" + movieKey);
                 movieCrewEdgeModel.setTo(BaseEntityModel.CREW_COLLECTION_NAME + "/" + objectId);
-                movieCrewEdgeModel.setJob(jsonObject.get("job").toString());
+                movieCrewEdgeModel.setJob(String.valueOf(jsonObject.get("job")));
                 arangoDBConnection.addDocument(Movies.MOVIES_DB_NAME, MovieCrewEdgeModel.CREDITS_CREW_EDGE_COLLECTION_NAME, movieCrewEdgeModel);
             }
         } catch (ParseException pe) {

@@ -1,6 +1,5 @@
 package ucr.ppci.nosql.movies.csv;
 
-import com.google.gson.JsonParser;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -8,6 +7,7 @@ import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ucr.ppci.nosql.movies.Movies;
+import ucr.ppci.nosql.movies.Util;
 import ucr.ppci.nosql.movies.db.ArangoDBConnection;
 import ucr.ppci.nosql.movies.model.BaseEdgeModel;
 import ucr.ppci.nosql.movies.model.BaseEntityModel;
@@ -26,9 +26,13 @@ public class KeywordRowProcessor extends BaseRowProcessor {
     @Override
     public void process(String cells[]) {
 
-        // these JSON values INCORRECTLY use single quotes for string values and GSON parser can fix that
-        String sanitizedJson = new JsonParser().parse(cells[1]).toString();
-        processKeywords(cells[0], sanitizedJson);
+        //only process complete rows
+        if (cells.length >= 2) {
+            // these JSON values INCORRECTLY use single quotes for string values and GSON parser can fix that
+            processKeywords(cells[0], Util.sanitizeJson(cells[1]));
+        } else {
+            logger.warn("\tKeywords row has less fields than expected");
+        }
     }
 
     private void processKeywords(String movieKey, String jsonString) {

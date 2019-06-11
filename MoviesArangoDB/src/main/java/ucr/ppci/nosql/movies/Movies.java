@@ -83,6 +83,8 @@ public class Movies {
     private void readCSV(String fileName, BaseRowProcessor modelRow) {
         int lines = 0;
 
+        logger.info("CSV File {} is being read ...", fileName);
+
         try{
             // open file reader
             Path filePath = Paths.get(getClass().getClassLoader().getResource(fileName).toURI());
@@ -95,9 +97,15 @@ public class Movies {
             Iterator<String[]> iterator = csvReader.iterator();
 
             for (lines = 0; iterator.hasNext(); ) {
-                modelRow.process(iterator.next());
                 lines++;
+                modelRow.process(iterator.next());
+
+                // show progress ...
+                if ((lines % 10000) == 0) {
+                    logger.info("\t{}: {} lines processed", fileName, lines);
+                }
             }
+            logger.info("\t{}: {} lines processed)", fileName, lines);
         }
         catch (Exception e) {
             logger.error("Failed to read file {}. {}", fileName, e.getMessage());
@@ -126,10 +134,10 @@ public class Movies {
         movies.createCollections();
 
         // read abd process CSV files
-        movies.readCSV("movies_metadata_100.csv", new MovieRowProcessor());
-        movies.readCSV("keywords_100.csv", new KeywordRowProcessor());
-        movies.readCSV("ratings_100.csv", new RatingRowProcessor());
-        movies.readCSV("credits_100.csv", new CreditsRowProcessor());
+        movies.readCSV("movies_metadata.csv", new MovieRowProcessor());
+        movies.readCSV("keywords.csv", new KeywordRowProcessor());
+        movies.readCSV("ratings_1M.csv", new RatingRowProcessor());
+        movies.readCSV("credits.csv", new CreditsRowProcessor());
 
         System.exit(0);
     }
