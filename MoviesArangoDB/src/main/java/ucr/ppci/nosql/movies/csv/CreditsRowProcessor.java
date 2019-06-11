@@ -14,7 +14,6 @@ import ucr.ppci.nosql.movies.model.MovieCrewEdgeModel;
 import ucr.ppci.nosql.movies.model.MovieModel;
 
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 
 public class CreditsRowProcessor extends BaseRowProcessor {
@@ -26,14 +25,14 @@ public class CreditsRowProcessor extends BaseRowProcessor {
 
     public void process(String cells[]) {
 
-        // this JSON values INCORRECTLY use single quotes for string values and gson parser can fix that
+        // this JSON values INCORRECTLY use single quotes for string values and GSON parser can fix that
         String sanitizedJson = new JsonParser().parse(cells[0]).toString();
-        System.out.println("Cast: " + sanitizedJson);
+        //System.out.println("Cast: " + sanitizedJson);
         processCast(cells[2], sanitizedJson);
 
-        // this JSON values INCORRECTLY use single quotes for string values and gson parser can fix that
+        // this JSON values INCORRECTLY use single quotes for string values and GSON parser can fix that
         sanitizedJson = new JsonParser().parse(cells[1]).toString();
-        System.out.println("Crew: " + sanitizedJson);
+        //System.out.println("Crew: " + sanitizedJson);
         processCrew(cells[2], sanitizedJson);
     };
 
@@ -42,23 +41,23 @@ public class CreditsRowProcessor extends BaseRowProcessor {
         BaseEntityModel model = new BaseEntityModel();
 
         try {
-            // parse JSON genres values
+            // parse JSON values
             JSONArray jsonArray = (JSONArray) jsonParser.parse(jsonString);
             JSONObject jsonObject = null;
             String objectId = null;
 
-            // process each cast member in the list
+            // process each item in the list
             for (Object castObject: jsonArray.toArray()) {
                 jsonObject = (JSONObject)castObject;
                 objectId = jsonObject.get("id").toString();
 
-                // check if cast member is not already in cache (and so in the DB)
+                // check if item is not already in cache (and so in the DB)
                 if (!castCache.contains(objectId)) {
                     model.setKey(objectId);
                     model.setName(jsonObject.get("name").toString());
+                    System.out.println("CAST: " + model.toString());
 
-                    // add genre to DB and cache
-                    //System.out.println("CAST: " + model.toString());
+                    // add item to DB and cache
                     arangoDBConnection.addDocument(Movies.MOVIES_DB_NAME, BaseEntityModel.CAST_COLLECTION_NAME, model);
                     castCache.add(objectId);
                 }
@@ -71,7 +70,7 @@ public class CreditsRowProcessor extends BaseRowProcessor {
                 arangoDBConnection.addDocument(Movies.MOVIES_DB_NAME, MovieCastEdgeModel.CREDITS_CAST_EDGE_COLLECTION_NAME, movieCastEdgeModel);
             }
         } catch (ParseException pe) {
-            System.err.println("Failed to parse JSON value. " + pe.getMessage());
+            System.err.println("Failed to parse JSON value (" + jsonString +"). " + pe.getMessage());
         }
     }
 
@@ -80,23 +79,23 @@ public class CreditsRowProcessor extends BaseRowProcessor {
         BaseEntityModel model = new BaseEntityModel();
 
         try {
-            // parse JSON genres values
+            // parse JSON values
             JSONArray jsonArray = (JSONArray) jsonParser.parse(jsonString);
             JSONObject jsonObject = null;
             String objectId = null;
 
-            // process each crew member in the list
+            // process item in the list
             for (Object crewObject: jsonArray.toArray()) {
                 jsonObject = (JSONObject)crewObject;
                 objectId = jsonObject.get("id").toString();
 
-                // check if crew member is not already in cache (and so in the DB)
+                // check if item is not already in cache (and so in the DB)
                 if (!crewCache.contains(objectId)) {
                     model.setKey(objectId);
                     model.setName(jsonObject.get("name").toString());
+                    System.out.println("CREW: " + model.toString());
 
-                    // add genre to DB and cache
-                   // System.out.println("CREW: " + model.toString());
+                    // add item to DB and cache
                     arangoDBConnection.addDocument(Movies.MOVIES_DB_NAME, BaseEntityModel.CREW_COLLECTION_NAME, model);
                     crewCache.add(objectId);
                 }
@@ -109,7 +108,7 @@ public class CreditsRowProcessor extends BaseRowProcessor {
                 arangoDBConnection.addDocument(Movies.MOVIES_DB_NAME, MovieCrewEdgeModel.CREDITS_CREW_EDGE_COLLECTION_NAME, movieCrewEdgeModel);
             }
         } catch (ParseException pe) {
-            System.err.println("Failed to parse JSON value. " + pe.toString());
+            System.err.println("Failed to parse JSON value (" + jsonString +"). " + pe.getMessage());
         }
     }
 

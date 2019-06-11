@@ -19,7 +19,7 @@ public class RatingRowProcessor extends BaseRowProcessor {
         rating.setRating(Float.parseFloat(cells[2]));
         rating.setTimeStamp(cells[3]);
 
-        System.out.println("RatingModel: " + rating.toString());
+        System.out.println("RATING: " + rating.toString());
         arangoDBConnection.addDocument(Movies.MOVIES_DB_NAME, RatingModel.RATINGS_COLLECTION_NAME, rating);
 
         // add edge -> relationship

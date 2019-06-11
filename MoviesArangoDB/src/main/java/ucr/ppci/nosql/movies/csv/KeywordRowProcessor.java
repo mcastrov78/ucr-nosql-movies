@@ -23,7 +23,6 @@ public class KeywordRowProcessor extends BaseRowProcessor {
     public void process(String cells[]) {
 
         // replace single quotes in JSON for double quotes
-        System.out.println("\tKeywords: " + cells[1]);
         processKeywords(cells[0], cells[1].replace("'", "\""));
     }
 
@@ -32,27 +31,26 @@ public class KeywordRowProcessor extends BaseRowProcessor {
         BaseEntityModel model = new BaseEntityModel();
 
         try {
-            // parse JSON keywords values
+            // parse JSON values
             JSONArray jsonArray = (JSONArray) jsonParser.parse(jsonString);
             JSONObject jsonObject = null;
             String objectId = null;
 
-            // process each keyword in the list
+            // process each item in the list
             for (Object keywordObject: jsonArray.toArray()) {
                 jsonObject = (JSONObject)keywordObject;
                 objectId = jsonObject.get("id").toString();
 
-                // check if element is not already in cache (and so in the DB)
+                // check if item is not already in cache (and so in the DB)
                 if (!keywordsCache.contains(objectId)) {
                     model.setKey(objectId);
                     model.setName(jsonObject.get("name").toString());
+                    System.out.println("KEYWORD: " + model.toString());
 
-                    // add keyword to DB and cache
+                    // add item to DB and cache
                     arangoDBConnection.addDocument(Movies.MOVIES_DB_NAME, BaseEntityModel.KEYWORDS_COLLECTION_NAME, model);
                     keywordsCache.add(objectId);
                 }
-
-                System.out.println("KEYWORD: " + model.toString());
 
                 // add edge -> relationship
                 BaseEdgeModel edge = new BaseEdgeModel();
@@ -61,7 +59,7 @@ public class KeywordRowProcessor extends BaseRowProcessor {
                 arangoDBConnection.addDocument(Movies.MOVIES_DB_NAME, BaseEdgeModel.KEYWORDS_EDGE_COLLECTION_NAME, edge);
             }
         } catch (ParseException pe) {
-            System.err.println("Failed to parse JSON value. " + pe.getMessage());
+            System.err.println("Failed to parse JSON value (" + jsonString +"). " + pe.getMessage());
         }
     }
 
