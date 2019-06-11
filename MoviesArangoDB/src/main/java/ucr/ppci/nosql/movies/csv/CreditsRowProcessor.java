@@ -6,6 +6,8 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ucr.ppci.nosql.movies.Movies;
 import ucr.ppci.nosql.movies.db.ArangoDBConnection;
 import ucr.ppci.nosql.movies.model.MovieCastEdgeModel;
@@ -18,6 +20,7 @@ import java.util.Set;
 
 public class CreditsRowProcessor extends BaseRowProcessor {
 
+    final private static Logger logger = LoggerFactory.getLogger(CreditsRowProcessor.class);
     final private static ArangoDBConnection arangoDBConnection = ArangoDBConnection.getInstance();
 
     private Set castCache = new HashSet<BaseEntityModel>();
@@ -25,14 +28,12 @@ public class CreditsRowProcessor extends BaseRowProcessor {
 
     public void process(String cells[]) {
 
-        // this JSON values INCORRECTLY use single quotes for string values and GSON parser can fix that
+        // these JSON values INCORRECTLY use single quotes for string values and GSON parser can fix that
         String sanitizedJson = new JsonParser().parse(cells[0]).toString();
-        //System.out.println("Cast: " + sanitizedJson);
         processCast(cells[2], sanitizedJson);
 
-        // this JSON values INCORRECTLY use single quotes for string values and GSON parser can fix that
+        // these JSON values INCORRECTLY use single quotes for string values and GSON parser can fix that
         sanitizedJson = new JsonParser().parse(cells[1]).toString();
-        //System.out.println("Crew: " + sanitizedJson);
         processCrew(cells[2], sanitizedJson);
     };
 
@@ -55,7 +56,6 @@ public class CreditsRowProcessor extends BaseRowProcessor {
                 if (!castCache.contains(objectId)) {
                     model.setKey(objectId);
                     model.setName(jsonObject.get("name").toString());
-                    System.out.println("CAST: " + model.toString());
 
                     // add item to DB and cache
                     arangoDBConnection.addDocument(Movies.MOVIES_DB_NAME, BaseEntityModel.CAST_COLLECTION_NAME, model);
@@ -70,7 +70,7 @@ public class CreditsRowProcessor extends BaseRowProcessor {
                 arangoDBConnection.addDocument(Movies.MOVIES_DB_NAME, MovieCastEdgeModel.CREDITS_CAST_EDGE_COLLECTION_NAME, movieCastEdgeModel);
             }
         } catch (ParseException pe) {
-            System.err.println("Failed to parse JSON value (" + jsonString +"). " + pe.getMessage());
+            logger.error("Failed to parse JSON value ({}). {}", jsonString, pe.getMessage());
         }
     }
 
@@ -93,7 +93,6 @@ public class CreditsRowProcessor extends BaseRowProcessor {
                 if (!crewCache.contains(objectId)) {
                     model.setKey(objectId);
                     model.setName(jsonObject.get("name").toString());
-                    System.out.println("CREW: " + model.toString());
 
                     // add item to DB and cache
                     arangoDBConnection.addDocument(Movies.MOVIES_DB_NAME, BaseEntityModel.CREW_COLLECTION_NAME, model);
@@ -108,7 +107,7 @@ public class CreditsRowProcessor extends BaseRowProcessor {
                 arangoDBConnection.addDocument(Movies.MOVIES_DB_NAME, MovieCrewEdgeModel.CREDITS_CREW_EDGE_COLLECTION_NAME, movieCrewEdgeModel);
             }
         } catch (ParseException pe) {
-            System.err.println("Failed to parse JSON value (" + jsonString +"). " + pe.getMessage());
+            logger.error("Failed to parse JSON value ({}). {}", jsonString, pe.getMessage());
         }
     }
 

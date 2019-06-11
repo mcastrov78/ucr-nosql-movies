@@ -3,6 +3,7 @@ package ucr.ppci.nosql.movies;
 import java.io.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Iterator;
 
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
@@ -11,11 +12,15 @@ import ucr.ppci.nosql.movies.csv.*;
 import ucr.ppci.nosql.movies.db.ArangoDBConnection;
 import ucr.ppci.nosql.movies.model.*;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class Movies {
 
-    final public static String MOVIES_DB_NAME = "Movies";
-
+    final private static Logger logger = LoggerFactory.getLogger(Movies.class);
     final private static ArangoDBConnection arangoDBConnection = ArangoDBConnection.getInstance();
+
+    final public static String MOVIES_DB_NAME = "Movies";
 
     private void deleteCollections() {
         // delete edge collections
@@ -76,6 +81,8 @@ public class Movies {
     }
 
     private void readCSV(String fileName, BaseRowProcessor modelRow) {
+        int lines = 0;
+
         try{
             // open file reader
             Path filePath = Paths.get(getClass().getClassLoader().getResource(fileName).toURI());
@@ -83,17 +90,20 @@ public class Movies {
 
             // create csvReader object passing file reader as a parameter
             CSVReader csvReader = new CSVReaderBuilder(filereader).withSkipLines(1).build();
-            String[] nextRecord;
 
             // read data line by line
-            while ((nextRecord = csvReader.readNext()) != null) {
-                modelRow.process(nextRecord);
+            Iterator<String[]> iterator = csvReader.iterator();
+
+            for (lines = 0; iterator.hasNext(); ) {
+                modelRow.process(iterator.next());
+                lines++;
             }
         }
         catch (Exception e) {
-            System.err.println("Failed to read file. " + e.getMessage());
+            logger.error("Failed to read file {}. {}", fileName, e.getMessage());
         }
-        System.out.println("<<<<<<<<<< " + fileName + " was processed successfully " + " >>>>>>>>>>");
+
+        logger.info("CSV File {} was processed successfully ({} lines read)", fileName, lines);
     }
 
     public static void main(String args[]) {

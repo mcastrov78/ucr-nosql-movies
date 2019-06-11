@@ -1,9 +1,12 @@
 package ucr.ppci.nosql.movies.csv;
 
+import com.google.gson.JsonParser;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ucr.ppci.nosql.movies.Movies;
 import ucr.ppci.nosql.movies.db.ArangoDBConnection;
 import ucr.ppci.nosql.movies.model.BaseEdgeModel;
@@ -15,6 +18,7 @@ import java.util.Set;
 
 public class MovieRowProcessor extends BaseRowProcessor {
 
+    final private static Logger logger = LoggerFactory.getLogger(MovieRowProcessor.class);
     final private static ArangoDBConnection arangoDBConnection = ArangoDBConnection.getInstance();
 
     private Set genresCache = new HashSet<BaseEntityModel>();
@@ -34,26 +38,29 @@ public class MovieRowProcessor extends BaseRowProcessor {
         movie.setRevenue(Float.parseFloat(cells[15]));
         movie.setRuntime(Float.parseFloat(cells[16]));
         movie.setAdult(Boolean.parseBoolean(cells[0]));
-        System.out.println("MOVIE: " + movie.toString());
 
         // add movie to DB
         arangoDBConnection.addDocument(Movies.MOVIES_DB_NAME, MovieModel.MOVIES_COLLECTION_NAME, movie);
 
-        // replace single quotes in JSON for double quotes
-        //System.out.println("\tGenres: " + cells[3]);
+        // these JSON values INCORRECTLY use single quotes for string values and GSON parser can fix that
+        String sanitizedJson = new JsonParser().parse(cells[3]).toString();
+        processGenres(movie.getKey(), sanitizedJson);
+
+        sanitizedJson = new JsonParser().parse(cells[12]).toString();
+        processCompanies(movie.getKey(), sanitizedJson);
+
+        sanitizedJson = new JsonParser().parse(cells[13]).toString();
+        processCountries(movie.getKey(), sanitizedJson);
+
+        sanitizedJson = new JsonParser().parse(cells[17]).toString();
+        processSpokenLanguages(movie.getKey(), sanitizedJson);
+
+        /*
         processGenres(movie.getKey(), cells[3].replace("'", "\""));
-
-        // replace single quotes in JSON for double quotes
-        //System.out.println("\tCompanies: " + cells[12]);
         processCompanies(movie.getKey(), cells[12].replace("'", "\""));
-
-        // replace single quotes in JSON for double quotes
-        //System.out.println("\tCountries: " + cells[13]);
         processCountries(movie.getKey(), cells[13].replace("'", "\""));
-
-        // replace single quotes in JSON for double quotes
-        //System.out.println("\tSpokenLanguages: " + cells[17]);
         processSpokenLanguages(movie.getKey(), cells[17].replace("'", "\""));
+        */
     };
 
     private void processGenres(String movieKey, String jsonString) {
@@ -75,7 +82,6 @@ public class MovieRowProcessor extends BaseRowProcessor {
                 if (!genresCache.contains(objectId)) {
                     model.setKey(objectId);
                     model.setName(jsonObject.get("name").toString());
-                    System.out.println("\tGENRE: " + model.toString());
 
                     // add item to DB and cache
                     arangoDBConnection.addDocument(Movies.MOVIES_DB_NAME, BaseEntityModel.GENRES_COLLECTION_NAME, model);
@@ -89,7 +95,7 @@ public class MovieRowProcessor extends BaseRowProcessor {
                 arangoDBConnection.addDocument(Movies.MOVIES_DB_NAME, BaseEdgeModel.MOVIES_GENRES_EDGE_COLLECTION_NAME, edge);
             }
         } catch (ParseException pe) {
-            System.err.println("Failed to parse JSON value (" + jsonString +"). " + pe.getMessage());
+            logger.error("Failed to parse JSON value ({}). {}", jsonString, pe.getMessage());
         }
     }
 
@@ -112,7 +118,6 @@ public class MovieRowProcessor extends BaseRowProcessor {
                 if (!companiesCache.contains(objectId)) {
                     model.setKey(objectId);
                     model.setName(jsonObject.get("name").toString());
-                    System.out.println("\tCOMPANY: " + model.toString());
 
                     // add genre to DB and cache
                     arangoDBConnection.addDocument(Movies.MOVIES_DB_NAME, BaseEntityModel.COMPANIES_COLLECTION_NAME, model);
@@ -126,7 +131,7 @@ public class MovieRowProcessor extends BaseRowProcessor {
                 arangoDBConnection.addDocument(Movies.MOVIES_DB_NAME, BaseEdgeModel.MOVIES_COMPANIES_EDGE_COLLECTION_NAME, edge);
             }
         } catch (ParseException pe) {
-            System.err.println("Failed to parse JSON value (" + jsonString +"). " + pe.getMessage());
+            logger.error("Failed to parse JSON value ({}). {}", jsonString, pe.getMessage());
         }
     }
 
@@ -149,7 +154,6 @@ public class MovieRowProcessor extends BaseRowProcessor {
                 if (!spokenLanguagesCache.contains(objectId)) {
                     model.setKey(objectId);
                     model.setName(jsonObject.get("name").toString());
-                    System.out.println("SPOKEN_LANGUAGE: " + model.toString());
 
                     // add item to DB and cache
                     arangoDBConnection.addDocument(Movies.MOVIES_DB_NAME, BaseEntityModel.SPOKEN_LANGUAGES_COLLECTION_NAME, model);
@@ -163,7 +167,7 @@ public class MovieRowProcessor extends BaseRowProcessor {
                 arangoDBConnection.addDocument(Movies.MOVIES_DB_NAME, BaseEdgeModel.MOVIES_SPOKEN_LANGUAGES_EDGE_COLLECTION_NAME, edge);
             }
         } catch (ParseException pe) {
-            System.err.println("Failed to parse JSON value (" + jsonString +"). " + pe.getMessage());
+            logger.error("Failed to parse JSON value ({}). {}", jsonString, pe.getMessage());
         }
     }
 
@@ -186,7 +190,6 @@ public class MovieRowProcessor extends BaseRowProcessor {
                 if (!countriesCache.contains(objectId)) {
                     model.setKey(objectId);
                     model.setName(jsonObject.get("name").toString());
-                    System.out.println("COUNTRY: " + model.toString());
 
                     // add production_country to DB and cache
                     arangoDBConnection.addDocument(Movies.MOVIES_DB_NAME, BaseEntityModel.COUNTRIES_COLLECTION_NAME, model);
@@ -200,7 +203,7 @@ public class MovieRowProcessor extends BaseRowProcessor {
                 arangoDBConnection.addDocument(Movies.MOVIES_DB_NAME, BaseEdgeModel.MOVIES_COUNTRIES_EDGE_COLLECTION_NAME, edge);
             }
         } catch (ParseException pe) {
-            System.err.println("Failed to parse JSON value (" + jsonString +"). " + pe.getMessage());
+            logger.error("Failed to parse JSON value ({}). {}", jsonString, pe.getMessage());
         }
     }
 

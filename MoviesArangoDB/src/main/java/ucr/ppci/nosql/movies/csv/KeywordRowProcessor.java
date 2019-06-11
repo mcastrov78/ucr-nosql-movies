@@ -1,9 +1,12 @@
 package ucr.ppci.nosql.movies.csv;
 
+import com.google.gson.JsonParser;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ucr.ppci.nosql.movies.Movies;
 import ucr.ppci.nosql.movies.db.ArangoDBConnection;
 import ucr.ppci.nosql.movies.model.BaseEdgeModel;
@@ -15,6 +18,7 @@ import java.util.Set;
 
 public class KeywordRowProcessor extends BaseRowProcessor {
 
+    final private static Logger logger = LoggerFactory.getLogger(KeywordRowProcessor.class);
     final private static ArangoDBConnection arangoDBConnection = ArangoDBConnection.getInstance();
 
     private Set keywordsCache = new HashSet<BaseEntityModel>();
@@ -22,8 +26,9 @@ public class KeywordRowProcessor extends BaseRowProcessor {
     @Override
     public void process(String cells[]) {
 
-        // replace single quotes in JSON for double quotes
-        processKeywords(cells[0], cells[1].replace("'", "\""));
+        // these JSON values INCORRECTLY use single quotes for string values and GSON parser can fix that
+        String sanitizedJson = new JsonParser().parse(cells[1]).toString();
+        processKeywords(cells[0], sanitizedJson);
     }
 
     private void processKeywords(String movieKey, String jsonString) {
@@ -45,7 +50,6 @@ public class KeywordRowProcessor extends BaseRowProcessor {
                 if (!keywordsCache.contains(objectId)) {
                     model.setKey(objectId);
                     model.setName(jsonObject.get("name").toString());
-                    System.out.println("KEYWORD: " + model.toString());
 
                     // add item to DB and cache
                     arangoDBConnection.addDocument(Movies.MOVIES_DB_NAME, BaseEntityModel.KEYWORDS_COLLECTION_NAME, model);
@@ -59,7 +63,7 @@ public class KeywordRowProcessor extends BaseRowProcessor {
                 arangoDBConnection.addDocument(Movies.MOVIES_DB_NAME, BaseEdgeModel.KEYWORDS_EDGE_COLLECTION_NAME, edge);
             }
         } catch (ParseException pe) {
-            System.err.println("Failed to parse JSON value (" + jsonString +"). " + pe.getMessage());
+            logger.error("Failed to parse JSON value ({}). {}", jsonString, pe.getMessage());
         }
     }
 

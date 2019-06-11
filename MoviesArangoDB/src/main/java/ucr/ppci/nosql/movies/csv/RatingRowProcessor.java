@@ -1,5 +1,7 @@
 package ucr.ppci.nosql.movies.csv;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ucr.ppci.nosql.movies.db.ArangoDBConnection;
 import ucr.ppci.nosql.movies.model.BaseEdgeModel;
 import ucr.ppci.nosql.movies.model.MovieModel;
@@ -8,6 +10,7 @@ import ucr.ppci.nosql.movies.Movies;
 
 public class RatingRowProcessor extends BaseRowProcessor {
 
+    final private static Logger logger = LoggerFactory.getLogger(MovieRowProcessor.class);
     final private static ArangoDBConnection arangoDBConnection = ArangoDBConnection.getInstance();
 
     public void process(String cells[]) {
@@ -19,7 +22,7 @@ public class RatingRowProcessor extends BaseRowProcessor {
         rating.setRating(Float.parseFloat(cells[2]));
         rating.setTimeStamp(cells[3]);
 
-        System.out.println("RATING: " + rating.toString());
+        // add rating to DB
         arangoDBConnection.addDocument(Movies.MOVIES_DB_NAME, RatingModel.RATINGS_COLLECTION_NAME, rating);
 
         // add edge -> relationship

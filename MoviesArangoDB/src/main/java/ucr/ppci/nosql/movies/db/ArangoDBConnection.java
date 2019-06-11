@@ -7,7 +7,12 @@ import com.arangodb.entity.CollectionEntity;
 import com.arangodb.entity.CollectionType;
 import com.arangodb.model.CollectionCreateOptions;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class ArangoDBConnection {
+
+    final private static Logger logger = LoggerFactory.getLogger(ArangoDBConnection.class);
 
     final private static ArangoDBConnection arangoDBConnection = new ArangoDBConnection();
     final private ArangoDB arangoDB = new ArangoDB.Builder().build();
@@ -21,19 +26,19 @@ public class ArangoDBConnection {
     public void createDB(String dbName) {
         try {
             arangoDB.createDatabase(dbName);
-            System.out.println("Database created: " + dbName);
+            logger.info("Database created: {}", dbName);
         } catch (final ArangoDBException ae) {
-            System.err.println("Failed to create database: " + dbName + "; " + ae.getMessage());
+            logger.error("Failed to create database: {}. {}", dbName, ae.getMessage());
         }
     }
 
     public void createCollection(String dbName, String collectionName) {
         try {
             final CollectionEntity newCollection = arangoDB.db(dbName).createCollection(collectionName);
-            System.out.println("Collection created: " + collectionName);
+            logger.info("Collection created: {}", collectionName);
         }
         catch (final ArangoDBException ae) {
-            System.err.println("Failed to create collection: " + collectionName + "; " + ae.getMessage());
+            logger.error("Failed to create collection: {}. {}", collectionName, ae.getMessage());
         }
     }
 
@@ -41,20 +46,20 @@ public class ArangoDBConnection {
         try {
             final ArangoCollection collection = arangoDB.db(dbName).collection(collectionName);
             collection.drop();
-            System.out.println("Collection deleted: " + collectionName);
+            logger.info("Collection deleted: {}", collectionName);
         }
         catch (final ArangoDBException ae) {
-            System.err.println("Failed to delete collection: " + collectionName + "; " + ae.getMessage());
+            logger.error("Failed to delete collection: {}. {}", collectionName, ae.getMessage());
         }
     }
 
     public void createEdgeCollection(String dbName, String edgeCollectionName) {
         try {
-            final CollectionEntity newCollection = arangoDB.db(dbName).createCollection(edgeCollectionName, new CollectionCreateOptions().type(CollectionType.EDGES));
-            System.out.println("Edge Collection created: " + edgeCollectionName);
+            arangoDB.db(dbName).createCollection(edgeCollectionName, new CollectionCreateOptions().type(CollectionType.EDGES));
+            logger.info("Edge Collection created: {}", edgeCollectionName);
         }
         catch (final ArangoDBException ae) {
-            System.err.println("Failed to create edge collection: " + edgeCollectionName + "; " + ae.getMessage());
+            logger.error("Failed to create edge collection: {}. {}", edgeCollectionName, ae.getMessage());
         }
     }
 
@@ -63,7 +68,7 @@ public class ArangoDBConnection {
             arangoDB.db(dbName).collection(collectionName).insertDocument(document);
         }
         catch (final ArangoDBException ae) {
-            System.err.println("Failed to insert document. " + ae.getMessage());
+            logger.error("Failed to insert document in collection {} ({}). {}", collectionName, document.toString(), ae.getMessage());
         }
     }
 
