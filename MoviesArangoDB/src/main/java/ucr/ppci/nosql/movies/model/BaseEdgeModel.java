@@ -2,12 +2,11 @@ package ucr.ppci.nosql.movies.model;
 
 public class BaseEdgeModel {
 
-    final public static String MOVIES_GENRES_EDGE_COLLECTION_NAME = "moviesGenres";
-    final public static String MOVIES_COMPANIES_EDGE_COLLECTION_NAME = "moviesCompanies";
-    final public static String MOVIES_SPOKEN_LANGUAGES_EDGE_COLLECTION_NAME = "moviesSpokenLanguages";
-    final public static String MOVIES_COUNTRIES_EDGE_COLLECTION_NAME = "moviesCountries";
-    final public static String KEYWORDS_EDGE_COLLECTION_NAME = "moviesKeywords";
-    final public static String RATINGS_EDGE_COLLECTION_NAME = "moviesRatings";
+    final public static String MOVIES_GENRES_EDGE_COLLECTION_NAME = "isOfGenre";
+    final public static String MOVIES_COMPANIES_EDGE_COLLECTION_NAME = "producedBy";
+    final public static String MOVIES_SPOKEN_LANGUAGES_EDGE_COLLECTION_NAME = "spokenIn";
+    final public static String MOVIES_COUNTRIES_EDGE_COLLECTION_NAME = "producedIn";
+    final public static String KEYWORDS_EDGE_COLLECTION_NAME = "describes";
 
     private String _from;
     private String _to;

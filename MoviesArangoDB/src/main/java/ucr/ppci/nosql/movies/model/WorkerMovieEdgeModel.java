@@ -1,8 +1,8 @@
 package ucr.ppci.nosql.movies.model;
 
-public class MovieCrewEdgeModel extends BaseEdgeModel {
+public class WorkerMovieEdgeModel extends BaseEdgeModel {
 
-    final public static String CREDITS_CREW_EDGE_COLLECTION_NAME = "moviesCrew";
+    final public static String CREDITS_WORKER_MOVIE_EDGE_COLLECTION_NAME = "worksIn";
 
     private String job;
 
@@ -16,7 +16,7 @@ public class MovieCrewEdgeModel extends BaseEdgeModel {
 
     @Override
     public String toString() {
-        return "MovieCrewEdgeModel{" +
+        return "WorkerMovieEdgeModel{" +
                 "_from='" + super.getFrom() + '\'' +
                 ", _to='" + super.getTo() + '\'' +
                 "job='" + job + '\'' +

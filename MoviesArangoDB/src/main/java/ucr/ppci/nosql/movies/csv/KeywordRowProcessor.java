@@ -62,8 +62,8 @@ public class KeywordRowProcessor extends BaseRowProcessor {
 
                 // add edge -> relationship
                 BaseEdgeModel edge = new BaseEdgeModel();
-                edge.setFrom(MovieModel.MOVIES_COLLECTION_NAME + "/" + movieKey);
-                edge.setTo(BaseEntityModel.KEYWORDS_COLLECTION_NAME + "/" + objectId);
+                edge.setFrom(BaseEntityModel.KEYWORDS_COLLECTION_NAME + "/" + objectId);
+                edge.setTo(MovieModel.MOVIES_COLLECTION_NAME + "/" + movieKey);
                 arangoDBConnection.addDocument(Movies.MOVIES_DB_NAME, BaseEdgeModel.KEYWORDS_EDGE_COLLECTION_NAME, edge);
             }
         } catch (ParseException pe) {

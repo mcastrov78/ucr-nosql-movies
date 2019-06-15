@@ -9,9 +9,9 @@ import org.slf4j.LoggerFactory;
 import ucr.ppci.nosql.movies.Movies;
 import ucr.ppci.nosql.movies.Util;
 import ucr.ppci.nosql.movies.db.ArangoDBConnection;
-import ucr.ppci.nosql.movies.model.MovieCastEdgeModel;
+import ucr.ppci.nosql.movies.model.ActorMovieEdgeModel;
 import ucr.ppci.nosql.movies.model.BaseEntityModel;
-import ucr.ppci.nosql.movies.model.MovieCrewEdgeModel;
+import ucr.ppci.nosql.movies.model.WorkerMovieEdgeModel;
 import ucr.ppci.nosql.movies.model.MovieModel;
 
 import java.util.HashSet;
@@ -22,8 +22,8 @@ public class CreditsRowProcessor extends BaseRowProcessor {
     final private static Logger logger = LoggerFactory.getLogger(CreditsRowProcessor.class);
     final private static ArangoDBConnection arangoDBConnection = ArangoDBConnection.getInstance();
 
-    private Set castCache = new HashSet<BaseEntityModel>();
-    private Set crewCache = new HashSet<BaseEntityModel>();
+    private Set actorsCache = new HashSet<BaseEntityModel>();
+    private Set workersCache = new HashSet<BaseEntityModel>();
 
     public void process(String cells[]) {
 
@@ -48,21 +48,21 @@ public class CreditsRowProcessor extends BaseRowProcessor {
                 objectId = jsonObject.get("id").toString();
 
                 // check if item is not already in cache (and so in the DB)
-                if (!castCache.contains(objectId)) {
+                if (!actorsCache.contains(objectId)) {
                     model.setKey(objectId);
                     model.setName(jsonObject.get("name").toString());
 
                     // add item to DB and cache
-                    arangoDBConnection.addDocument(Movies.MOVIES_DB_NAME, BaseEntityModel.CAST_COLLECTION_NAME, model);
-                    castCache.add(objectId);
+                    arangoDBConnection.addDocument(Movies.MOVIES_DB_NAME, BaseEntityModel.ACTORS_COLLECTION_NAME, model);
+                    actorsCache.add(objectId);
                 }
 
                 // add edge -> relationship
-                MovieCastEdgeModel movieCastEdgeModel = new MovieCastEdgeModel();
-                movieCastEdgeModel.setFrom(MovieModel.MOVIES_COLLECTION_NAME + "/" + movieKey);
-                movieCastEdgeModel.setTo(BaseEntityModel.CAST_COLLECTION_NAME + "/" + objectId);
-                movieCastEdgeModel.setCharacter(String.valueOf(jsonObject.get("character")));
-                arangoDBConnection.addDocument(Movies.MOVIES_DB_NAME, MovieCastEdgeModel.CREDITS_CAST_EDGE_COLLECTION_NAME, movieCastEdgeModel);
+                ActorMovieEdgeModel edge = new ActorMovieEdgeModel();
+                edge.setFrom(BaseEntityModel.ACTORS_COLLECTION_NAME + "/" + objectId);
+                edge.setTo(MovieModel.MOVIES_COLLECTION_NAME + "/" + movieKey);
+                edge.setCharacter(String.valueOf(jsonObject.get("character")));
+                arangoDBConnection.addDocument(Movies.MOVIES_DB_NAME, ActorMovieEdgeModel.CREDITS_ACTOR_MOVIE_EDGE_COLLECTION_NAME, edge);
             }
         } catch (ParseException pe) {
             logger.error("Failed to parse JSON value ({}). {}", jsonString, pe.getMessage());
@@ -85,21 +85,21 @@ public class CreditsRowProcessor extends BaseRowProcessor {
                 objectId = jsonObject.get("id").toString();
 
                 // check if item is not already in cache (and so in the DB)
-                if (!crewCache.contains(objectId)) {
+                if (!workersCache.contains(objectId)) {
                     model.setKey(objectId);
                     model.setName(jsonObject.get("name").toString());
 
                     // add item to DB and cache
-                    arangoDBConnection.addDocument(Movies.MOVIES_DB_NAME, BaseEntityModel.CREW_COLLECTION_NAME, model);
-                    crewCache.add(objectId);
+                    arangoDBConnection.addDocument(Movies.MOVIES_DB_NAME, BaseEntityModel.WORKERS_COLLECTION_NAME, model);
+                    workersCache.add(objectId);
                 }
 
                 // add edge -> relationship
-                MovieCrewEdgeModel movieCrewEdgeModel = new MovieCrewEdgeModel();
-                movieCrewEdgeModel.setFrom(MovieModel.MOVIES_COLLECTION_NAME + "/" + movieKey);
-                movieCrewEdgeModel.setTo(BaseEntityModel.CREW_COLLECTION_NAME + "/" + objectId);
-                movieCrewEdgeModel.setJob(String.valueOf(jsonObject.get("job")));
-                arangoDBConnection.addDocument(Movies.MOVIES_DB_NAME, MovieCrewEdgeModel.CREDITS_CREW_EDGE_COLLECTION_NAME, movieCrewEdgeModel);
+                WorkerMovieEdgeModel edge = new WorkerMovieEdgeModel();
+                edge.setFrom(BaseEntityModel.WORKERS_COLLECTION_NAME + "/" + objectId);
+                edge.setTo(MovieModel.MOVIES_COLLECTION_NAME + "/" + movieKey);
+                edge.setJob(String.valueOf(jsonObject.get("job")));
+                arangoDBConnection.addDocument(Movies.MOVIES_DB_NAME, WorkerMovieEdgeModel.CREDITS_WORKER_MOVIE_EDGE_COLLECTION_NAME, edge);
             }
         } catch (ParseException pe) {
             logger.error("Failed to parse JSON value ({}). {}", jsonString, pe.getMessage());

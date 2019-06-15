@@ -12,7 +12,7 @@ public class Util {
         float floatNumber = 0;
 
         try {
-            Float.parseFloat(floatString);
+            floatNumber = Float.parseFloat(floatString);
         } catch (Exception e) {
             logger.error("Failed to parse float: {}. {}", floatString, e.getMessage());
         }

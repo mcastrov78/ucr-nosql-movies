@@ -29,9 +29,9 @@ public class Movies {
         arangoDBConnection.deleteCollection(MOVIES_DB_NAME, BaseEdgeModel.MOVIES_SPOKEN_LANGUAGES_EDGE_COLLECTION_NAME);
         arangoDBConnection.deleteCollection(MOVIES_DB_NAME, BaseEdgeModel.MOVIES_COUNTRIES_EDGE_COLLECTION_NAME);
         arangoDBConnection.deleteCollection(MOVIES_DB_NAME, BaseEdgeModel.KEYWORDS_EDGE_COLLECTION_NAME);
-        arangoDBConnection.deleteCollection(MOVIES_DB_NAME, BaseEdgeModel.RATINGS_EDGE_COLLECTION_NAME);
-        arangoDBConnection.deleteCollection(MOVIES_DB_NAME, MovieCastEdgeModel.CREDITS_CAST_EDGE_COLLECTION_NAME);
-        arangoDBConnection.deleteCollection(MOVIES_DB_NAME, MovieCrewEdgeModel.CREDITS_CREW_EDGE_COLLECTION_NAME);
+        arangoDBConnection.deleteCollection(MOVIES_DB_NAME, UserMovieEdgeModel.USER_MOVIE_EDGE_COLLECTION_NAME);
+        arangoDBConnection.deleteCollection(MOVIES_DB_NAME, ActorMovieEdgeModel.CREDITS_ACTOR_MOVIE_EDGE_COLLECTION_NAME);
+        arangoDBConnection.deleteCollection(MOVIES_DB_NAME, WorkerMovieEdgeModel.CREDITS_WORKER_MOVIE_EDGE_COLLECTION_NAME);
 
         // delete movies collections
         arangoDBConnection.deleteCollection(MOVIES_DB_NAME, MovieModel.MOVIES_COLLECTION_NAME);
@@ -43,12 +43,12 @@ public class Movies {
         // delete keywords collections
         arangoDBConnection.deleteCollection(MOVIES_DB_NAME, BaseEntityModel.KEYWORDS_COLLECTION_NAME);
 
-        // delete ratings collections
-        arangoDBConnection.deleteCollection(MOVIES_DB_NAME, RatingModel.RATINGS_COLLECTION_NAME);
+        // delete users collections
+        arangoDBConnection.deleteCollection(MOVIES_DB_NAME, BaseEntityModel.USERS_COLLECTION_NAME);
 
         // delete credits collections
-        arangoDBConnection.deleteCollection(MOVIES_DB_NAME, BaseEntityModel.CAST_COLLECTION_NAME);
-        arangoDBConnection.deleteCollection(MOVIES_DB_NAME, BaseEntityModel.CREW_COLLECTION_NAME);
+        arangoDBConnection.deleteCollection(MOVIES_DB_NAME, BaseEntityModel.ACTORS_COLLECTION_NAME);
+        arangoDBConnection.deleteCollection(MOVIES_DB_NAME, BaseEntityModel.WORKERS_COLLECTION_NAME);
     }
 
     private void createCollections() {
@@ -62,12 +62,12 @@ public class Movies {
         // create keywords collections
         arangoDBConnection.createCollection(MOVIES_DB_NAME, BaseEntityModel.KEYWORDS_COLLECTION_NAME);
 
-        // create ratings collections
-        arangoDBConnection.createCollection(MOVIES_DB_NAME, RatingModel.RATINGS_COLLECTION_NAME);
+        // create users collections
+        arangoDBConnection.createCollection(MOVIES_DB_NAME, BaseEntityModel.USERS_COLLECTION_NAME);
 
         // create credits collections
-        arangoDBConnection.createCollection(MOVIES_DB_NAME, BaseEntityModel.CAST_COLLECTION_NAME);
-        arangoDBConnection.createCollection(MOVIES_DB_NAME, BaseEntityModel.CREW_COLLECTION_NAME);
+        arangoDBConnection.createCollection(MOVIES_DB_NAME, BaseEntityModel.ACTORS_COLLECTION_NAME);
+        arangoDBConnection.createCollection(MOVIES_DB_NAME, BaseEntityModel.WORKERS_COLLECTION_NAME);
 
         // create edge collections
         arangoDBConnection.createEdgeCollection(MOVIES_DB_NAME, BaseEdgeModel.MOVIES_GENRES_EDGE_COLLECTION_NAME);
@@ -75,9 +75,9 @@ public class Movies {
         arangoDBConnection.createEdgeCollection(MOVIES_DB_NAME, BaseEdgeModel.MOVIES_SPOKEN_LANGUAGES_EDGE_COLLECTION_NAME);
         arangoDBConnection.createEdgeCollection(MOVIES_DB_NAME, BaseEdgeModel.MOVIES_COUNTRIES_EDGE_COLLECTION_NAME);
         arangoDBConnection.createEdgeCollection(MOVIES_DB_NAME, BaseEdgeModel.KEYWORDS_EDGE_COLLECTION_NAME);
-        arangoDBConnection.createEdgeCollection(MOVIES_DB_NAME, BaseEdgeModel.RATINGS_EDGE_COLLECTION_NAME);
-        arangoDBConnection.createEdgeCollection(MOVIES_DB_NAME, MovieCastEdgeModel.CREDITS_CAST_EDGE_COLLECTION_NAME);
-        arangoDBConnection.createEdgeCollection(MOVIES_DB_NAME, MovieCrewEdgeModel.CREDITS_CREW_EDGE_COLLECTION_NAME);
+        arangoDBConnection.createEdgeCollection(MOVIES_DB_NAME, UserMovieEdgeModel.USER_MOVIE_EDGE_COLLECTION_NAME);
+        arangoDBConnection.createEdgeCollection(MOVIES_DB_NAME, ActorMovieEdgeModel.CREDITS_ACTOR_MOVIE_EDGE_COLLECTION_NAME);
+        arangoDBConnection.createEdgeCollection(MOVIES_DB_NAME, WorkerMovieEdgeModel.CREDITS_WORKER_MOVIE_EDGE_COLLECTION_NAME);
     }
 
     private void readCSV(String fileName, BaseRowProcessor modelRow) {

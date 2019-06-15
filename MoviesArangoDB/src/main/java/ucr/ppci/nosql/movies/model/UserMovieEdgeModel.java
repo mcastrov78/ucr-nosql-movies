@@ -1,16 +1,11 @@
 package ucr.ppci.nosql.movies.model;
 
-public class RatingModel extends BaseEntityModel {
+public class UserMovieEdgeModel extends BaseEdgeModel {
 
-    final public static String RATINGS_COLLECTION_NAME = "ratings";
+    final public static String USER_MOVIE_EDGE_COLLECTION_NAME = "rates";
 
-    private String userID;
     private float rating;
     private String timeStamp;
-
-    public String getUserID() { return userID; }
-
-    public void setUserID(String userID) { this.userID = userID; }
 
     public float getRating() { return rating; }
 
@@ -22,10 +17,9 @@ public class RatingModel extends BaseEntityModel {
 
     @Override
     public String toString() {
-        return "RatingModel{" +
-                "_key=" + super.getKey() +
-                ", name='" + super.getName() + '\'' +
-                ", userID='" + userID + '\'' +
+        return "UserMovieEdgeModel{" +
+                "_from='" + super.getFrom() + '\'' +
+                ", _to='" + super.getTo() + '\'' +
                 ", rating='" + rating + '\'' +
                 ", timeStamp=" + timeStamp +
                 '}';

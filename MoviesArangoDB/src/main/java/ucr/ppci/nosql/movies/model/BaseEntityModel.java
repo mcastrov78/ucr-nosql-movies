@@ -7,8 +7,9 @@ public class BaseEntityModel {
     final public static String SPOKEN_LANGUAGES_COLLECTION_NAME = "spokenLanguages";
     final public static String COUNTRIES_COLLECTION_NAME = "countries";
     final public static String KEYWORDS_COLLECTION_NAME = "keywords";
-    final public static String CAST_COLLECTION_NAME = "cast";
-    final public static String CREW_COLLECTION_NAME = "crew";
+    final public static String USERS_COLLECTION_NAME = "users";
+    final public static String ACTORS_COLLECTION_NAME = "actors";
+    final public static String WORKERS_COLLECTION_NAME = "workers";
 
     private String _key;
     private String name;
