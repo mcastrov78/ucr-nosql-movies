@@ -136,7 +136,7 @@ public class Movies {
         // read abd process CSV files
         movies.readCSV("movies_metadata.csv", new MovieRowProcessor());
         movies.readCSV("keywords.csv", new KeywordRowProcessor());
-        movies.readCSV("ratings.csv", new RatingRowProcessor());
+        movies.readCSV("ratings_small.csv", new RatingRowProcessor());
         movies.readCSV("credits.csv", new CreditsRowProcessor());
 
         System.exit(0);
