@@ -87,11 +87,11 @@ public class Movies {
 
         try{
             // open file reader
-            Path filePath = Paths.get(getClass().getClassLoader().getResource(fileName).toURI());
-            FileReader filereader = new FileReader(filePath.toString());
+            InputStream is = getClass().getClassLoader().getResourceAsStream(fileName);
+            InputStreamReader isr = new InputStreamReader(is);
 
             // create csvReader object passing file reader as a parameter
-            CSVReader csvReader = new CSVReaderBuilder(filereader).withSkipLines(1).build();
+            CSVReader csvReader = new CSVReaderBuilder(isr).withSkipLines(1).build();
 
             // read data line by line
             Iterator<String[]> iterator = csvReader.iterator();
@@ -134,6 +134,7 @@ public class Movies {
         movies.createCollections();
 
         // read abd process CSV files
+        logger.info("Classpath: {}", System.getProperty("java.class.path"));
         movies.readCSV("movies_metadata.csv", new MovieRowProcessor());
         movies.readCSV("keywords.csv", new KeywordRowProcessor());
         movies.readCSV("ratings_small.csv", new RatingRowProcessor());
