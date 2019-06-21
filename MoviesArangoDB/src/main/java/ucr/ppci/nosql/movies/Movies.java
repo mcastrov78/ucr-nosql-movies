@@ -88,7 +88,7 @@ public class Movies {
         try{
             // open file reader
             InputStream is = getClass().getClassLoader().getResourceAsStream(fileName);
-            InputStreamReader isr = new InputStreamReader(is);
+            InputStreamReader isr = new InputStreamReader(is, "UTF-8");
 
             // create csvReader object passing file reader as a parameter
             CSVReader csvReader = new CSVReaderBuilder(isr).withSkipLines(1).build();
